@@ -1,0 +1,22 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/xmlsigning
+    docker:
+      - image: circleci/python:3.8
+    steps:
+      - checkout
+      - run:
+          sudo apt-get update && sudo apt-get install -y xmlsec1
+      - run:
+          xmlsec1 --version
+      - run:
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+      - run:
+          $HOME/.poetry/bin/poetry install
+      - run:
+          $HOME/.poetry/bin/poetry run pytest
+      - run:
+          $HOME/.poetry/bin/poetry run black --check
+      - run:
+          $HOME/.poetry/bin/poetry run isort --check-only

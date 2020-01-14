@@ -1,0 +1,7 @@
+XML_EXC_C14N = "http://www.w3.org/2001/10/xml-exc-c14n#"
+XMLDSIG = "http://www.w3.org/2000/09/xmldsig#"
+XMLDSIG_SHA1 = "https://www.w3.org/2000/09/xmldsig#sha1"
+XMLDSIG_RSA_SHA1 = "https://www.w3.org/2000/09/xmldsig#rsa-sha1"
+XMLENC_SHA256 = "http://www.w3.org/2001/04/xmlenc#sha256"
+XMLDSIG_RSA_SHA256 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+XMLDSIG_ENVELOPED_SIGNATURE = "http://www.w3.org/2000/09/xmldsig#enveloped-signature"
