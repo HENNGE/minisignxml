@@ -1,5 +1,5 @@
 import base64
-from typing import List
+from typing import List, Mapping
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -74,8 +74,10 @@ def serialize_xml(element: Element) -> bytes:
     return tostring(element, method="c14n", exclusive=True)
 
 
-def find_or_raise(element: Element, path: str) -> Element:
-    return exactly_one(element.findall(path, NAMESPACE_MAP), path, element)
+def find_or_raise(
+    element: Element, path: str, ns_map: Mapping[str, str] = NAMESPACE_MAP
+) -> Element:
+    return exactly_one(element.findall(path, ns_map), path, element)
 
 
 def exactly_one(elements: List[Element], path, parent) -> Element:

@@ -1,26 +1,26 @@
-class XMLSigningError(Exception):
+class MiniSignXMLError(Exception):
     pass
 
 
-class VerificationFailed(XMLSigningError):
+class VerificationFailed(MiniSignXMLError):
     pass
 
 
-class CertificateMismatch(XMLSigningError):
+class CertificateMismatch(MiniSignXMLError):
     pass
 
 
-class UnsupportedHasher(XMLSigningError):
+class UnsupportedHasher(MiniSignXMLError):
     pass
 
 
-class UnsupportedAlgorithm(XMLSigningError):
+class UnsupportedAlgorithm(MiniSignXMLError):
     pass
 
 
-class ElementNotFound(XMLSigningError):
+class ElementNotFound(MiniSignXMLError):
     pass
 
 
-class MultipleElementsFound(XMLSigningError):
+class MultipleElementsFound(MiniSignXMLError):
     pass

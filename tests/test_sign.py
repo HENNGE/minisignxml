@@ -3,7 +3,7 @@ from lxml.builder import ElementMaker
 from minisignxml.config import SigningConfig
 from minisignxml.internal import utils
 from minisignxml.sign import sign
-from minisignxml.verify import verify
+from minisignxml.verify import extract_verified_element
 
 
 def test_pysign_verified_by_xmlsec1(xmlsec1, key_and_cert, tmp_path):
@@ -38,6 +38,7 @@ def test_roundtrip(key_and_cert):
         certificate=key_and_cert.certificate,
         config=config,
     )
-    verified = verify(xml=signed_data, certificate=key_and_cert.certificate)
-    verified_data = utils.serialize_xml(verified)
-    assert unsigned_data == verified_data
+    verified_element = extract_verified_element(
+        xml=signed_data, certificate=key_and_cert.certificate
+    )
+    assert unsigned_data == utils.serialize_xml(verified_element)

@@ -52,12 +52,14 @@ Returns `bytes` containing the serialized XML including the signature.
 
 ### Verifying
 
-`minisignxml.verify.verify`
+`minisignxml.verify.extract_verified_element`
 
 ```python
-def verify(*, xml: bytes, certificate: Certificate) -> Element:
+def extract_verified_element(*, xml: bytes, certificate: Certificate) -> Element:
 ```
 
 Verifies that the XML document given (as bytes) is correctly signed using the private key of the `cryptography.x509.Certificate` provided. 
 
-Raises an exception (see `minisignxml.errors`, though other exceptions such as `ValueError`, `KeyError` or others may also be raised) if the verification failed. Otherwise returns the signed `lxml.etree._Element` (not necessarily the whole document passed to `verify`), with the signature removed.
+A successful call to `extract_verified_element` does not guarantee the integrity of the whole document passed to it via the `xml` parameter. Only the sub-tree returned from the function has been verified. The caller should use the returned `lxml.etree._Element` for further processing.
+
+Raises an exception (see `minisignxml.errors`, though other exceptions such as `ValueError`, `KeyError` or others may also be raised) if the verification failed. Otherwise returns the signed `lxml.etree._Element` (not necessarily the whole document passed to `extract_verified_element`), with the signature removed.

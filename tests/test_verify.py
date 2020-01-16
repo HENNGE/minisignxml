@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509 import Certificate, load_pem_x509_certificate
 
 from minisignxml.errors import VerificationFailed
-from minisignxml.verify import verify
+from minisignxml.verify import extract_verified_element
 
 
 @pytest.fixture
@@ -79,10 +79,10 @@ def test_verify(xmlsec1, tmp_path, cert_and_signed):
         str(signed),
     )
 
-    element = verify(xml=xml, certificate=cert)
-    assert element is not None
-    assert element.tag == "{urn:test}signed"
-    assert element.attrib["ID"] == "test"
+    verified_element = extract_verified_element(xml=xml, certificate=cert)
+    assert verified_element is not None
+    assert verified_element.tag == "{urn:test}signed"
+    assert verified_element.attrib["ID"] == "test"
 
 
 def test_verify_fail(cert_and_signed):
@@ -92,4 +92,4 @@ def test_verify_fail(cert_and_signed):
         b"<test:content>Changed Value</test:content>",
     )
     with pytest.raises(VerificationFailed):
-        verify(xml=broken, certificate=cert)
+        extract_verified_element(xml=broken, certificate=cert)

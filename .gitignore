@@ -3,3 +3,5 @@
 __pycache__
 *.egg-info
 poetry.lock
+dist
+pip-wheel-metadata

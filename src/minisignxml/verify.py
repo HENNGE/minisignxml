@@ -11,10 +11,10 @@ from .internal import utils
 from .internal.constants import XML_EXC_C14N, XMLDSIG_ENVELOPED_SIGNATURE
 from .internal.namespaces import NAMESPACE_MAP
 
-__all__ = ("verify",)
+__all__ = ("extract_verified_element",)
 
 
-def verify(*, xml: bytes, certificate: Certificate) -> Element:
+def extract_verified_element(*, xml: bytes, certificate: Certificate) -> Element:
     tree = utils.deserialize_xml(xml)
     signature = utils.find_or_raise(tree, ".//ds:Signature")
     signed_info = utils.find_or_raise(signature, "./ds:SignedInfo")
@@ -68,5 +68,4 @@ def verify(*, xml: bytes, certificate: Certificate) -> Element:
     referenced_digest = utils.hash_digest(digest_hasher, referenced_bytes)
     if not compare_digest(base64.b64decode(digest_value), referenced_digest):
         raise VerificationFailed()
-    # hack to re-parent the tree... there has to be a better way
     return utils.deserialize_xml(referenced_bytes)
