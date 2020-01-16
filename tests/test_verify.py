@@ -2,10 +2,15 @@ from typing import Tuple
 
 import pytest
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509 import Certificate, load_pem_x509_certificate
+from lxml.builder import ElementMaker
 
-from minisignxml.errors import VerificationFailed
+from minisignxml.config import SigningConfig, VerifyConfig
+from minisignxml.errors import UnsupportedAlgorithm, VerificationFailed
+from minisignxml.internal import utils
+from minisignxml.sign import sign
 from minisignxml.verify import extract_verified_element
 
 
@@ -93,3 +98,25 @@ def test_verify_fail(cert_and_signed):
     )
     with pytest.raises(VerificationFailed):
         extract_verified_element(xml=broken, certificate=cert)
+
+
+def test_verify_config(key_and_cert):
+    ns = ElementMaker(namespace="urn:test", nsmap={"test": "urn:test"})
+    element_to_sign = ns.signed(ns.content("Value"), ID="test")
+    ns.root(element_to_sign)
+    config = SigningConfig(signature_method=hashes.SHA1(), digest_method=hashes.SHA1())
+    signed_data = sign(
+        element=element_to_sign,
+        private_key=key_and_cert.private_key,
+        certificate=key_and_cert.certificate,
+        config=config,
+    )
+    with pytest.raises(UnsupportedAlgorithm):
+        extract_verified_element(
+            xml=signed_data,
+            certificate=key_and_cert.certificate,
+            config=VerifyConfig(
+                allowed_signature_method={hashes.SHA256},
+                allowed_digest_method={hashes.SHA256},
+            ),
+        )

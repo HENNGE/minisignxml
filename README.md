@@ -55,7 +55,12 @@ Returns `bytes` containing the serialized XML including the signature.
 `minisignxml.verify.extract_verified_element`
 
 ```python
-def extract_verified_element(*, xml: bytes, certificate: Certificate) -> Element:
+def extract_verified_element(
+    *, 
+    xml: bytes, 
+    certificate: Certificate,  
+    config: VerifyConfig=VerifyConfig.default()
+) -> Element:
 ```
 
 Verifies that the XML document given (as bytes) is correctly signed using the private key of the `cryptography.x509.Certificate` provided. 
@@ -63,3 +68,12 @@ Verifies that the XML document given (as bytes) is correctly signed using the pr
 A successful call to `extract_verified_element` does not guarantee the integrity of the whole document passed to it via the `xml` parameter. Only the sub-tree returned from the function has been verified. The caller should use the returned `lxml.etree._Element` for further processing.
 
 Raises an exception (see `minisignxml.errors`, though other exceptions such as `ValueError`, `KeyError` or others may also be raised) if the verification failed. Otherwise returns the signed `lxml.etree._Element` (not necessarily the whole document passed to `extract_verified_element`), with the signature removed.
+
+You can control the allowed signature and digest method by using a custom `VerifyConfig` instance. By default only SHA-256 is allowed.
+
+#### VerifyConfig
+
+`minisignxml.config.SigningConfig` is a `dataclass` with the following fields:
+
+* `allowed_signature_methods`: A container of `cryptography.hazmat.primitives.hashes.HashAlgorithm` types to allow for signing. Defaults to `{cryptography.hazmat.primitives.hashes.SHA256}`.
+* `allowed_digest_methods`: A container of `cryptography.hazmat.primitives.hashes.HashAlgorithm` types to allow for the content digest. Defaults to `{cryptography.hazmat.primitives.hashes.SHA256}`.

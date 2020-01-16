@@ -6,6 +6,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import Certificate, load_der_x509_certificate
 from lxml.etree import XPath, _Element as Element
 
+from .config import VerifyConfig
 from .errors import CertificateMismatch, UnsupportedAlgorithm, VerificationFailed
 from .internal import utils
 from .internal.constants import XML_EXC_C14N, XMLDSIG_ENVELOPED_SIGNATURE
@@ -14,7 +15,12 @@ from .internal.namespaces import NAMESPACE_MAP
 __all__ = ("extract_verified_element",)
 
 
-def extract_verified_element(*, xml: bytes, certificate: Certificate) -> Element:
+def extract_verified_element(
+    *,
+    xml: bytes,
+    certificate: Certificate,
+    config: VerifyConfig = VerifyConfig.default(),
+) -> Element:
     tree = utils.deserialize_xml(xml)
     signature = utils.find_or_raise(tree, ".//ds:Signature")
     signed_info = utils.find_or_raise(signature, "./ds:SignedInfo")
@@ -29,12 +35,17 @@ def extract_verified_element(*, xml: bytes, certificate: Certificate) -> Element
     c14n_method = utils.find_or_raise(signed_info, "ds:CanonicalizationMethod")
     if c14n_method.attrib["Algorithm"] != XML_EXC_C14N:
         raise UnsupportedAlgorithm(c14n_method.attrib["Algorithm"])
+    signature_hasher = utils.signature_method_hasher(
+        signature_method.attrib["Algorithm"]
+    )
+    if not isinstance(signature_hasher, tuple(config.allowed_signature_method)):
+        raise UnsupportedAlgorithm(signature_method.attrib["Algorithm"])
     try:
         utils.verify(
             base64.b64decode(signature_value.text),
             utils.serialize_xml(signed_info),
             certificate,
-            utils.signature_method_hasher(signature_method.attrib["Algorithm"]),
+            signature_hasher,
         )
     except InvalidSignature:
         raise VerificationFailed()
@@ -56,6 +67,8 @@ def extract_verified_element(*, xml: bytes, certificate: Certificate) -> Element
     ]
     digest_value = utils.find_or_raise(reference, "ds:DigestValue").text
     digest_hasher = utils.digest_method_hasher(digest_method)
+    if not isinstance(digest_hasher, tuple(config.allowed_digest_method)):
+        raise UnsupportedAlgorithm(digest_method)
     referenced_element = utils.exactly_one(
         XPath(".//*[@ID = $reference]")(tree, reference=reference_id),
         f".//*[@ID = {reference_id!r}]",
