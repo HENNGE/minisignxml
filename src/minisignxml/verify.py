@@ -70,7 +70,9 @@ def extract_verified_element(
     if not isinstance(digest_hasher, tuple(config.allowed_digest_method)):
         raise UnsupportedAlgorithm(digest_method)
     referenced_element = utils.exactly_one(
-        XPath(".//*[@ID = $reference]")(tree, reference=reference_id),
+        XPath("descendant-or-self::*[@ID = $reference_id]")(
+            tree, reference_id=reference_id
+        ),
         f".//*[@ID = {reference_id!r}]",
         tree,
     )
