@@ -58,21 +58,30 @@ class KeyAndCert:
 
 
 @pytest.fixture
-def key_and_cert(tmp_path) -> KeyAndCert:
-    backend = default_backend()
-    key = rsa.generate_private_key(
-        public_exponent=65537, key_size=2048, backend=backend
-    )
-    cert = (
-        x509.CertificateBuilder()
-        .subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "test")]))
-        .issuer_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "test")]))
-        .public_key(key.public_key())
-        .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.datetime.utcnow())
-        .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=1))
-        .sign(key, hashes.SHA256(), backend)
-    )
+def key_factory() -> Callable[[], Tuple[RSAPrivateKeyWithSerialization, Certificate]]:
+    def factory():
+        backend = default_backend()
+        key = rsa.generate_private_key(
+            public_exponent=65537, key_size=2048, backend=backend
+        )
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "test")]))
+            .issuer_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "test")]))
+            .public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(datetime.datetime.utcnow())
+            .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=1))
+            .sign(key, hashes.SHA256(), backend)
+        )
+        return key, cert
+
+    return factory
+
+
+@pytest.fixture
+def key_and_cert(tmp_path, key_factory) -> KeyAndCert:
+    key, cert = key_factory()
     return KeyAndCert(tmp_path, key, cert)
 
 

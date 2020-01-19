@@ -8,6 +8,7 @@ from cryptography.x509 import Certificate
 from lxml.etree import _Element as Element
 
 from .config import SigningConfig
+from .errors import NoIDAttribute
 from .internal import utils
 from .internal.constants import *
 from .internal.namespaces import ds
@@ -26,7 +27,7 @@ def sign(
     try:
         element_id = element.attrib["ID"]
     except KeyError:
-        element.attrib["ID"] = element_id = secrets.token_hex()
+        raise NoIDAttribute(element)
     # Generate the digest value of the element/content to be signed
     content_digest_value = utils.ascii_b64(
         utils.hash_digest(config.digest_method, utils.serialize_xml(element))
@@ -64,4 +65,6 @@ def sign(
     )
     element.insert(index, signature_element)
     root = utils.get_root(element)
-    return utils.serialize_xml(root)
+    result = utils.serialize_xml(root)
+    element.remove(signature_element)
+    return result

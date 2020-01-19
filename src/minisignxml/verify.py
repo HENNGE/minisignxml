@@ -28,7 +28,7 @@ def extract_verified_element(
     signature_value = utils.find_or_raise(signature, "./ds:SignatureValue")
     key_info = utils.find_or_raise(signature, "./ds:KeyInfo/ds:X509Data")
     xml_cert = load_der_x509_certificate(
-        base64.b64decode(key_info.text), default_backend()
+        base64.b64decode(key_info.text, validate=True), default_backend()
     )
     if xml_cert != certificate:
         raise CertificateMismatch()
@@ -42,7 +42,7 @@ def extract_verified_element(
         raise UnsupportedAlgorithm(signature_method.attrib["Algorithm"])
     try:
         utils.verify(
-            base64.b64decode(signature_value.text),
+            base64.b64decode(signature_value.text, validate=True),
             utils.serialize_xml(signed_info),
             certificate,
             signature_hasher,
@@ -81,6 +81,6 @@ def extract_verified_element(
     signature.getparent().remove(signature)
     referenced_bytes = utils.serialize_xml(referenced_element)
     referenced_digest = utils.hash_digest(digest_hasher, referenced_bytes)
-    if not compare_digest(base64.b64decode(digest_value), referenced_digest):
+    if not compare_digest(base64.b64decode(digest_value, validate=True), referenced_digest):
         raise VerificationFailed()
     return utils.deserialize_xml(referenced_bytes)

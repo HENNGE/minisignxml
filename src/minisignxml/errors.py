@@ -24,3 +24,7 @@ class ElementNotFound(MiniSignXMLError):
 
 class MultipleElementsFound(MiniSignXMLError):
     pass
+
+
+class NoIDAttribute(MiniSignXMLError):
+    pass

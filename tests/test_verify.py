@@ -1,3 +1,4 @@
+import binascii
 from typing import Tuple
 
 import pytest
@@ -5,10 +6,15 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509 import Certificate, load_pem_x509_certificate
-from lxml.builder import ElementMaker
+from lxml.builder import ElementMaker, E
 
 from minisignxml.config import SigningConfig, VerifyConfig
-from minisignxml.errors import UnsupportedAlgorithm, VerificationFailed
+from minisignxml.errors import (
+    UnsupportedAlgorithm,
+    VerificationFailed,
+    CertificateMismatch,
+    MultipleElementsFound,
+)
 from minisignxml.internal import utils
 from minisignxml.sign import sign
 from minisignxml.verify import extract_verified_element
@@ -120,3 +126,66 @@ def test_verify_config(key_and_cert):
                 allowed_digest_method={hashes.SHA256},
             ),
         )
+
+
+def test_verify_fails_with_different_certificate(key_and_cert, key_factory):
+    ns = ElementMaker(namespace="urn:test", nsmap={"test": "urn:test"})
+    element_to_sign = ns.signed(ns.content("Value"), ID="test")
+    ns.root(element_to_sign)
+    signed_data = sign(
+        element=element_to_sign,
+        private_key=key_and_cert.private_key,
+        certificate=key_and_cert.certificate,
+    )
+    _, other = key_factory()
+    with pytest.raises(CertificateMismatch):
+        extract_verified_element(xml=signed_data, certificate=other)
+
+
+def test_double_signature_fails(key_and_cert):
+    element = E.tag("Value", ID="Test")
+    signed_data = sign(
+        element=element,
+        private_key=key_and_cert.private_key,
+        certificate=key_and_cert.certificate,
+    )
+    element = utils.deserialize_xml(signed_data)
+    signed_data = sign(
+        element=element,
+        private_key=key_and_cert.private_key,
+        certificate=key_and_cert.certificate,
+    )
+    with pytest.raises(MultipleElementsFound):
+        extract_verified_element(xml=signed_data, certificate=key_and_cert.certificate)
+
+
+def test_double_reference_fails(key_and_cert):
+    target = E.tag("Target", ID="same")
+    E.root(target, E.tag("Other", ID="same"))
+    signed_data = sign(
+        element=target,
+        private_key=key_and_cert.private_key,
+        certificate=key_and_cert.certificate,
+    )
+    with pytest.raises(MultipleElementsFound):
+        extract_verified_element(xml=signed_data, certificate=key_and_cert.certificate)
+
+
+def test_verification_failed(cert_and_signed):
+    cert, xml = cert_and_signed
+    root = utils.deserialize_xml(xml)
+    signature_value = root.find(".//{http://www.w3.org/2000/09/xmldsig#}SignatureValue")
+    signature_value.text = "x" + signature_value.text
+    xml = utils.serialize_xml(root)
+    with pytest.raises(VerificationFailed):
+        extract_verified_element(xml=xml, certificate=cert)
+
+
+def test_verification_failed2(cert_and_signed):
+    cert, xml = cert_and_signed
+    root = utils.deserialize_xml(xml)
+    signature_value = root.find(".//{http://www.w3.org/2000/09/xmldsig#}SignatureValue")
+    signature_value.text = signature_value.text + "x"
+    xml = utils.serialize_xml(root)
+    with pytest.raises(binascii.Error):
+        extract_verified_element(xml=xml, certificate=cert)

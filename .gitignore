@@ -5,3 +5,5 @@ __pycache__
 poetry.lock
 dist
 pip-wheel-metadata
+htmlcov
+.coverage
