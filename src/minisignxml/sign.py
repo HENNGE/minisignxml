@@ -61,7 +61,7 @@ def sign(
     signature_element = ds.Signature(
         signed_info,
         ds.SignatureValue(signature_value),
-        ds.KeyInfo(ds.X509Data(cert_data)),
+        ds.KeyInfo(ds.X509Data(ds.X509Certificate(cert_data))),
     )
     element.insert(index, signature_element)
     root = utils.get_root(element)

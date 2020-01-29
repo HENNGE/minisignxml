@@ -26,7 +26,9 @@ def extract_verified_element(
     signed_info = utils.find_or_raise(signature, "./ds:SignedInfo")
     signature_method = utils.find_or_raise(signed_info, "./ds:SignatureMethod")
     signature_value = utils.find_or_raise(signature, "./ds:SignatureValue")
-    key_info = utils.find_or_raise(signature, "./ds:KeyInfo/ds:X509Data")
+    key_info = utils.find_or_raise(
+        signature, "./ds:KeyInfo/ds:X509Data/ds:X509Certificate"
+    )
     xml_cert = load_der_x509_certificate(
         base64.b64decode(key_info.text, validate=True), default_backend()
     )
@@ -78,9 +80,11 @@ def extract_verified_element(
     )
     # remove the signature node (since it's enveloped)
     # this is both required to verify the signature and also cleans up the returned element
-    signature.getparent().remove(signature)
+    utils.remove_preserving_whitespace(signature)
     referenced_bytes = utils.serialize_xml(referenced_element)
     referenced_digest = utils.hash_digest(digest_hasher, referenced_bytes)
-    if not compare_digest(base64.b64decode(digest_value, validate=True), referenced_digest):
+    if not compare_digest(
+        base64.b64decode(digest_value, validate=True), referenced_digest
+    ):
         raise VerificationFailed()
     return utils.deserialize_xml(referenced_bytes)
