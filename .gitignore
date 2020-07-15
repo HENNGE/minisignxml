@@ -7,3 +7,4 @@ dist
 pip-wheel-metadata
 htmlcov
 .coverage
+.mypy_cache
