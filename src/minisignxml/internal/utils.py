@@ -4,7 +4,7 @@ from typing import List, Mapping
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 from cryptography.hazmat.primitives.hashes import HashAlgorithm
 from cryptography.x509 import Certificate
 from defusedxml.lxml import fromstring
@@ -71,7 +71,9 @@ def deserialize_xml(xml: bytes) -> Element:
 
 
 def serialize_xml(element: Element) -> bytes:
-    return tostring(element, method="c14n", exclusive=True)
+    xml = tostring(element, method="c14n", exclusive=True)
+    assert isinstance(xml, bytes)
+    return xml
 
 
 def find_or_raise(
@@ -80,7 +82,7 @@ def find_or_raise(
     return exactly_one(element.findall(path, ns_map), path, element)
 
 
-def exactly_one(elements: List[Element], path, parent) -> Element:
+def exactly_one(elements: List[Element], path: str, parent: Element) -> Element:
     num_results = len(elements)
     if num_results < 1:
         raise ElementNotFound(path, parent)
@@ -95,8 +97,13 @@ def sign(data: bytes, key: RSAPrivateKey, hasher: HashAlgorithm) -> bytes:
 
 def verify(
     signature: bytes, data: bytes, certificate: Certificate, hasher: HashAlgorithm
-):
-    certificate.public_key().verify(signature, data, padding.PKCS1v15(), hasher)
+) -> None:
+    key = certificate.public_key()
+    if not isinstance(key, RSAPublicKey):
+        raise TypeError(
+            f"Only certificates with RSA Keys are supported. Got {key!r} instead."
+        )
+    key.verify(signature, data, padding.PKCS1v15(), hasher)
 
 
 def get_root(element: Element) -> Element:
@@ -106,7 +113,7 @@ def get_root(element: Element) -> Element:
     return element
 
 
-def remove_preserving_whitespace(element: Element):
+def remove_preserving_whitespace(element: Element) -> None:
     parent = element.getparent()
     if element.tail:
         prev = element.getprevious()

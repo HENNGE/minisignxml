@@ -28,6 +28,7 @@ pytest = "^5.2"
 black = "^19.10b0"
 isort = {extras = ["toml"], version = "^4.3.21"}
 pytest-cov = "^2.8.1"
+mypy = "^0.782"
 
 [tool.isort]
 line_length = "88"
