@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import secrets
-
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509 import Certificate

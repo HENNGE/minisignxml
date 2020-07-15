@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "minisignxml"
-version = "2019.1"
+version = "2020.7b0"
 description = "Minimal XML signature and verification, intended for use with SAML2"
 authors = ["Jonas Obrist <jonas.obrist@hennge.com>"]
 

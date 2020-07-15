@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Collection, Container, Type
+from typing import Container, Type
 
 from cryptography.hazmat.primitives import hashes
 
