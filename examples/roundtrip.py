@@ -14,7 +14,7 @@ from minisignxml.sign import sign
 from minisignxml.verify import extract_verified_element
 
 
-def roundtrip():
+def roundtrip() -> None:
     """
     Create a super simple XML document:
         <tag ID='hoge'>Value</tag>
