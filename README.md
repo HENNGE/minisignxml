@@ -17,6 +17,7 @@ Supported features:
 * Only support X509 certificates and RSA private keys
 * Uses `lxml` for XML handling and `cryptography` for cryptography.
 * Only supports a single signature, with a single reference in a document.
+* Support certificate rollover by providing multiple certificates when verifying a document.
 
 `minisignxml` performs no IO and you have to manage and load the keys/certificates yourself.
 
@@ -71,6 +72,20 @@ A successful call to `extract_verified_element` does not guarantee the integrity
 Raises an exception (see `minisignxml.errors`, though other exceptions such as `ValueError`, `KeyError` or others may also be raised) if the verification failed. Otherwise returns the signed `lxml.etree._Element` (not necessarily the whole document passed to `extract_verified_element`), with the signature removed.
 
 You can control the allowed signature and digest method by using a custom `VerifyConfig` instance. By default only SHA-256 is allowed.
+
+`minisignxml.verify.extract_verified_element_and_certificate`
+
+```python
+def extract_verified_element_and_certificate(
+    *, 
+    xml: bytes, 
+    certificates: Collection[Certificate],  
+    config: VerifyConfig=VerifyConfig.default()
+) -> Tuple[Element, Certificate]:
+```
+
+Similar to `extract_verified_element`, but allows specifying multiple certificates to aid certificate rollover.
+The certificate that was used to sign the xml will be returned with the verified element.
 
 #### VerifyConfig
 
