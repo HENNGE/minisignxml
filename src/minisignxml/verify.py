@@ -1,5 +1,7 @@
 import base64
+import warnings
 from hmac import compare_digest
+from typing import Collection, Tuple
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
@@ -12,15 +14,15 @@ from .internal import utils
 from .internal.constants import XML_EXC_C14N, XMLDSIG_ENVELOPED_SIGNATURE
 from .internal.namespaces import NAMESPACE_MAP
 
-__all__ = ("extract_verified_element",)
+__all__ = ("extract_verified_element", "extract_verified_element_and_certificate")
 
 
-def extract_verified_element(
+def extract_verified_element_and_certificate(
     *,
     xml: bytes,
-    certificate: Certificate,
+    certificates: Collection[Certificate],
     config: VerifyConfig = VerifyConfig.default(),
-) -> Element:
+) -> Tuple[Element, Certificate]:
     tree = utils.deserialize_xml(xml)
     signature = utils.find_or_raise(tree, ".//ds:Signature")
     signed_info = utils.find_or_raise(signature, "./ds:SignedInfo")
@@ -32,8 +34,8 @@ def extract_verified_element(
     xml_cert = load_der_x509_certificate(
         base64.b64decode(key_info.text, validate=True), default_backend()
     )
-    if xml_cert != certificate:
-        raise CertificateMismatch()
+    if xml_cert not in certificates:
+        raise CertificateMismatch(xml_cert, certificates)
     c14n_method = utils.find_or_raise(signed_info, "ds:CanonicalizationMethod")
     if c14n_method.attrib["Algorithm"] != XML_EXC_C14N:
         raise UnsupportedAlgorithm(c14n_method.attrib["Algorithm"])
@@ -46,7 +48,7 @@ def extract_verified_element(
         utils.verify(
             base64.b64decode(signature_value.text, validate=True),
             utils.serialize_xml(signed_info),
-            certificate,
+            xml_cert,
             signature_hasher,
         )
     except InvalidSignature:
@@ -87,4 +89,15 @@ def extract_verified_element(
         base64.b64decode(digest_value, validate=True), referenced_digest
     ):
         raise VerificationFailed()
-    return utils.deserialize_xml(referenced_bytes)
+    return utils.deserialize_xml(referenced_bytes), xml_cert
+
+
+def extract_verified_element(
+    *,
+    xml: bytes,
+    certificate: Certificate,
+    config: VerifyConfig = VerifyConfig.default(),
+) -> Element:
+    return extract_verified_element_and_certificate(
+        xml=xml, certificates={certificate}, config=config
+    )[0]

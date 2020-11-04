@@ -1,3 +1,8 @@
+from typing import Collection
+
+from cryptography.x509 import Certificate
+
+
 class MiniSignXMLError(Exception):
     pass
 
@@ -7,7 +12,17 @@ class VerificationFailed(MiniSignXMLError):
 
 
 class CertificateMismatch(MiniSignXMLError):
-    pass
+    received_certificate: Certificate
+    expected_certificates: Collection[Certificate]
+
+    def __init__(
+        self,
+        received_certificate: Certificate,
+        expected_certificates: Collection[Certificate],
+    ):
+        self.received_certificate = received_certificate
+        self.expected_certificates = expected_certificates
+        super().__init__()
 
 
 class UnsupportedHasher(MiniSignXMLError):

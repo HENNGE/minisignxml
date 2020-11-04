@@ -17,7 +17,10 @@ from minisignxml.errors import (
 )
 from minisignxml.internal import utils
 from minisignxml.sign import sign
-from minisignxml.verify import extract_verified_element
+from minisignxml.verify import (
+    extract_verified_element,
+    extract_verified_element_and_certificate,
+)
 
 
 @pytest.fixture
@@ -192,3 +195,26 @@ def test_verification_failed2(cert_and_signed):
     xml = utils.serialize_xml(root)
     with pytest.raises(binascii.Error):
         extract_verified_element(xml=xml, certificate=cert)
+
+
+def test_extract_verified_element_and_certificate(cert_and_signed, key_factory):
+    _, incorrect_cert = key_factory()
+    correct_cert, xml = cert_and_signed
+
+    verified_element, used_certificate = extract_verified_element_and_certificate(
+        xml=xml, certificates={incorrect_cert, correct_cert}
+    )
+    assert used_certificate == correct_cert
+    assert verified_element is not None
+    assert verified_element.tag == "{urn:test}signed"
+    assert verified_element.attrib["ID"] == "test"
+
+
+def test_extract_verified_element_and_certificate_fail(cert_and_signed, key_factory):
+    _, incorrect_cert = key_factory()
+    correct_cert, xml = cert_and_signed
+
+    with pytest.raises(CertificateMismatch) as exc:
+        extract_verified_element_and_certificate(xml=xml, certificates={incorrect_cert})
+    assert exc.value.received_certificate == correct_cert
+    assert exc.value.expected_certificates == {incorrect_cert}
