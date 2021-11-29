@@ -1,5 +1,3 @@
-import base64
-import warnings
 from hmac import compare_digest
 from typing import Collection, Tuple
 
@@ -13,6 +11,7 @@ from .errors import CertificateMismatch, UnsupportedAlgorithm, VerificationFaile
 from .internal import utils
 from .internal.constants import XML_EXC_C14N, XMLDSIG_ENVELOPED_SIGNATURE
 from .internal.namespaces import NAMESPACE_MAP
+from .internal.utils import base64_binary_content
 
 __all__ = ("extract_verified_element", "extract_verified_element_and_certificate")
 
@@ -32,7 +31,7 @@ def extract_verified_element_and_certificate(
         signature, "./ds:KeyInfo/ds:X509Data/ds:X509Certificate"
     )
     xml_cert = load_der_x509_certificate(
-        base64.b64decode(key_info.text, validate=True), default_backend()
+        base64_binary_content(key_info), default_backend()
     )
     if xml_cert not in certificates:
         raise CertificateMismatch(xml_cert, certificates)
@@ -46,7 +45,7 @@ def extract_verified_element_and_certificate(
         raise UnsupportedAlgorithm(signature_method.attrib["Algorithm"])
     try:
         utils.verify(
-            base64.b64decode(signature_value.text, validate=True),
+            base64_binary_content(signature_value),
             utils.serialize_xml(signed_info),
             xml_cert,
             signature_hasher,
@@ -69,7 +68,7 @@ def extract_verified_element_and_certificate(
     digest_method = utils.find_or_raise(reference, "ds:DigestMethod").attrib[
         "Algorithm"
     ]
-    digest_value = utils.find_or_raise(reference, "ds:DigestValue").text
+    digest_value = utils.find_or_raise(reference, "ds:DigestValue")
     digest_hasher = utils.digest_method_hasher(digest_method)
     if not isinstance(digest_hasher, tuple(config.allowed_digest_method)):
         raise UnsupportedAlgorithm(digest_method)
@@ -85,9 +84,7 @@ def extract_verified_element_and_certificate(
     utils.remove_preserving_whitespace(signature)
     referenced_bytes = utils.serialize_xml(referenced_element)
     referenced_digest = utils.hash_digest(digest_hasher, referenced_bytes)
-    if not compare_digest(
-        base64.b64decode(digest_value, validate=True), referenced_digest
-    ):
+    if not compare_digest(base64_binary_content(digest_value), referenced_digest):
         raise VerificationFailed()
     return utils.deserialize_xml(referenced_bytes), xml_cert
 
