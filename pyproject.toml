@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "minisignxml"
-version = "21.10"
+version = "21.11"
 description = "Minimal XML signature and verification, intended for use with SAML2"
 authors = ["Jonas Obrist <jonas.obrist@hennge.com>"]
 license = "Apache-2.0"
@@ -23,7 +23,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-cryptography = ">=2.8"
+cryptography = ">=35.0"
 lxml = ">=4.4.1"
 defusedxml = ">=0.6.0"
 
