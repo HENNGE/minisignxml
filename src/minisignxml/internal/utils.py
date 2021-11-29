@@ -122,3 +122,13 @@ def remove_preserving_whitespace(element: Element) -> None:
         else:
             parent.text = (parent.text or "") + element.tail
     parent.remove(element)
+
+
+def base64_binary_content(element: Element) -> bytes:
+    return base64.b64decode(
+        element.text.replace("\n", "")
+        .replace("\r", "")
+        .replace("\t", "")
+        .replace(" ", ""),
+        validate=True,
+    )
