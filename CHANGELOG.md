@@ -1,6 +1,10 @@
 # Changelog
 
-## 22.4
+## 22.4.1
+
+* Fix packaging error
+
+## 22.4 (yanked)
 
 * Fixed SHA1 algorithm URIs
 
