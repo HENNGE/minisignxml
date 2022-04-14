@@ -1,5 +1,9 @@
 # Changelog
 
+## 22.4
+
+* Fixed SHA1 algorithm URIs
+
 ## 20.11b0
 
 * Added `minisignxml.verify.extract_verified_element_and_certificate` to allow specifying multiple certificates when verifying elements to aid certificate rollover.
