@@ -34,13 +34,14 @@ def sign(
     private_key: RSAPrivateKey,
     certificate: Certificate,
     config: SigningConfig = SigningConfig.default(),
-    index: int = 0
+    index: int = 0,
+    attribute: str = "ID"
 ) -> bytes:
 ```
 
 Signs the given `lxml.etree._Element` with the given `cryptography.hazmat.primitives.asymmetric.rsa.RSAPrivateKey` private key, embedding the `cryptography.x509.Certificate` in the signature. Use `minisignxml.config.SigningConfig` to control the hash algorithms uses (default is SHA-256). The `index` controls at which index the signature element is appended to the element.
 
-If the `element` passed in does not have an `ID` attribute, one will be set automatically. It is the callers responsibility to ensure the `ID` attribute of the `Element` is unique for the whole document.
+If the `element` passed in does not have an attribute matching `attribute`, an exception is raised. It is the callers responsibility to ensure the value of the `attribute` attribute of the `Element` is unique for the whole document.
 
 Returns `bytes` containing the serialized XML including the signature. 
 
@@ -61,7 +62,8 @@ def extract_verified_element(
     *, 
     xml: bytes, 
     certificate: Certificate,  
-    config: VerifyConfig=VerifyConfig.default()
+    config: VerifyConfig=VerifyConfig.default(),
+    attribute: str = "ID"
 ) -> Element:
 ```
 
@@ -80,7 +82,8 @@ def extract_verified_element_and_certificate(
     *, 
     xml: bytes, 
     certificates: Collection[Certificate],  
-    config: VerifyConfig=VerifyConfig.default()
+    config: VerifyConfig=VerifyConfig.default(),
+    attribute: str = "ID"
 ) -> Tuple[Element, Certificate]:
 ```
 

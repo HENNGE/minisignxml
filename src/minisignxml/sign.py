@@ -21,9 +21,10 @@ def sign(
     certificate: Certificate,
     config: SigningConfig = SigningConfig.default(),
     index: int = 0,
+    attribute: str = "ID",
 ) -> bytes:
     try:
-        element_id = element.attrib["ID"]
+        element_id = element.attrib[attribute]
     except KeyError:
         raise NoIDAttribute(element)
     if not isinstance(element_id, str):
