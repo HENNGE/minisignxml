@@ -1,10 +1,11 @@
 from hmac import compare_digest
-from typing import Collection, Tuple
+from typing import Collection, List, Tuple, cast
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import Certificate, load_der_x509_certificate
-from lxml.etree import XPath, _Element as Element
+from lxml.etree import XPath
+from lxml.etree import _Element as Element
 
 from .config import VerifyConfig
 from .errors import CertificateMismatch, UnsupportedAlgorithm, VerificationFailed
@@ -36,11 +37,12 @@ def extract_verified_element_and_certificate(
     if xml_cert not in certificates:
         raise CertificateMismatch(xml_cert, certificates)
     c14n_method = utils.find_or_raise(signed_info, "ds:CanonicalizationMethod")
-    if c14n_method.attrib["Algorithm"] != XML_EXC_C14N:
+    if c14n_method.get("Algorithm") != XML_EXC_C14N:
         raise UnsupportedAlgorithm(c14n_method.attrib["Algorithm"])
-    signature_hasher = utils.signature_method_hasher(
-        signature_method.attrib["Algorithm"]
-    )
+    signature_method_algorithm = signature_method.get("Algorithm")
+    if signature_method_algorithm is None:
+        raise UnsupportedAlgorithm("No algorithm specified")
+    signature_hasher = utils.signature_method_hasher(signature_method_algorithm)
     if not isinstance(signature_hasher, tuple(config.allowed_signature_method)):
         raise UnsupportedAlgorithm(signature_method.attrib["Algorithm"])
     try:
@@ -65,16 +67,19 @@ def extract_verified_element_and_certificate(
     }
     if transforms != {XMLDSIG_ENVELOPED_SIGNATURE, XML_EXC_C14N}:
         raise UnsupportedAlgorithm(transforms)
-    digest_method = utils.find_or_raise(reference, "ds:DigestMethod").attrib[
-        "Algorithm"
-    ]
+    digest_method = utils.find_or_raise(reference, "ds:DigestMethod").get("Algorithm")
+    if digest_method is None:
+        raise UnsupportedAlgorithm("No algorithm specified")
     digest_value = utils.find_or_raise(reference, "ds:DigestValue")
     digest_hasher = utils.digest_method_hasher(digest_method)
     if not isinstance(digest_hasher, tuple(config.allowed_digest_method)):
         raise UnsupportedAlgorithm(digest_method)
     referenced_element = utils.exactly_one(
-        XPath("descendant-or-self::*[@ID = $reference_id]")(
-            tree, reference_id=reference_id
+        cast(
+            List[Element],
+            XPath("descendant-or-self::*[@ID = $reference_id]")(
+                tree, reference_id=reference_id
+            ),
         ),
         f".//*[@ID = {reference_id!r}]",
         tree,

@@ -1,17 +1,24 @@
 repos:
--   repo: git://github.com/psf/black
-    rev: 21.9b0
-    hooks:
-    - id: black
--   repo: https://github.com/pycqa/isort
-    rev: 5.9.3
-    hooks:
-      - id: isort
 -   repo: local
     hooks:
+    -   id: black
+        name: black
+        entry: poetry run black src stubs tests
+        language: system
+        require_serial: true
+        types: [python]
+        pass_filenames: false
+    -   id: isort
+        name: isort
+        entry: poetry run isort
+        language: system
+        types: [python]
+        require_serial: true
+        args: ['--filter-files']
+        files: "^(src/.*\\.py|tests/.*\\.py|stubs/.*\\.py)"
     -   id: mypy
         name: mypy
-        entry: poetry run mypy src
+        entry: poetry run mypy
         language: system
         types: [python]
         pass_filenames: false

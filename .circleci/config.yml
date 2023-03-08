@@ -11,14 +11,14 @@ jobs:
       - run:
           xmlsec1 --version
       - run:
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+          curl -sSL https://install.python-poetry.org | python -
       - run:
-          $HOME/.poetry/bin/poetry install
+          $HOME/.local/bin/poetry install --no-ansi
       - run:
-          $HOME/.poetry/bin/poetry run pytest
+          $HOME/.local/bin/poetry run pytest
       - run:
-          $HOME/.poetry/bin/poetry run black --check .
+          $HOME/.local/bin/poetry run black --check .
       - run:
-          $HOME/.poetry/bin/poetry run isort --check-only .
+          $HOME/.local/bin/poetry run isort --check-only .
       - run:
-          $HOME/.poetry/bin/poetry run mypy src
+          $HOME/.local/bin/poetry run mypy src

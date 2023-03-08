@@ -8,7 +8,8 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPubl
 from cryptography.hazmat.primitives.hashes import HashAlgorithm
 from cryptography.x509 import Certificate
 from defusedxml.lxml import fromstring
-from lxml.etree import _Element as Element, tostring
+from lxml.etree import _Element as Element
+from lxml.etree import tostring
 
 from ..errors import (
     ElementNotFound,
@@ -36,7 +37,7 @@ def signature_method_algorithm(hasher: HashAlgorithm) -> str:
 
 
 def signature_method_hasher(algorithm: str) -> HashAlgorithm:
-    if algorithm == XMLDSIG_SHA1:
+    if algorithm == XMLDSIG_RSA_SHA1:
         return hashes.SHA1()
     elif algorithm == XMLDSIG_RSA_SHA256:
         return hashes.SHA256()
@@ -115,6 +116,7 @@ def get_root(element: Element) -> Element:
 
 def remove_preserving_whitespace(element: Element) -> None:
     parent = element.getparent()
+    assert parent
     if element.tail:
         prev = element.getprevious()
         if prev is not None:
@@ -126,7 +128,8 @@ def remove_preserving_whitespace(element: Element) -> None:
 
 def base64_binary_content(element: Element) -> bytes:
     return base64.b64decode(
-        element.text.replace("\n", "")
+        (element.text or "")
+        .replace("\n", "")
         .replace("\r", "")
         .replace("\t", "")
         .replace(" ", ""),
