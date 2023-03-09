@@ -26,6 +26,8 @@ def sign(
         element_id = element.attrib["ID"]
     except KeyError:
         raise NoIDAttribute(element)
+    if not isinstance(element_id, str):
+        raise TypeError()
     # Generate the digest value of the element/content to be signed
     content_digest_value = utils.ascii_b64(
         utils.hash_digest(config.digest_method, utils.serialize_xml(element))
