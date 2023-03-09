@@ -1,8 +1,10 @@
 # Changelog
 
-## 22.8
+## 23.3
 
 * Add support for alternative attributes for signing and verifying.
+* Fixed verification of signatures using SHA1 as their signature method.
+* Updated some dependencies.
 
 ## 22.4.1
 
