@@ -22,6 +22,7 @@ def extract_verified_element_and_certificate(
     xml: bytes,
     certificates: Collection[Certificate],
     config: VerifyConfig = VerifyConfig.default(),
+    attribute: str = "ID",
 ) -> Tuple[Element, Certificate]:
     tree = utils.deserialize_xml(xml)
     signature = utils.find_or_raise(tree, ".//ds:Signature")
@@ -77,11 +78,11 @@ def extract_verified_element_and_certificate(
     referenced_element = utils.exactly_one(
         cast(
             List[Element],
-            XPath("descendant-or-self::*[@ID = $reference_id]")(
+            XPath(f"descendant-or-self::*[@{attribute} = $reference_id]")(
                 tree, reference_id=reference_id
             ),
         ),
-        f".//*[@ID = {reference_id!r}]",
+        f".//*[@{attribute} = {reference_id!r}]",
         tree,
     )
     # remove the signature node (since it's enveloped)
@@ -99,7 +100,8 @@ def extract_verified_element(
     xml: bytes,
     certificate: Certificate,
     config: VerifyConfig = VerifyConfig.default(),
+    attribute: str = "ID",
 ) -> Element:
     return extract_verified_element_and_certificate(
-        xml=xml, certificates={certificate}, config=config
+        xml=xml, certificates={certificate}, config=config, attribute=attribute
     )[0]

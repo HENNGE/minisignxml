@@ -1,5 +1,9 @@
 # Changelog
 
+## 22.8
+
+* Add support for alternative attributes for signing and verifying.
+
 ## 22.4.1
 
 * Fix packaging error

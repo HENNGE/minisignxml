@@ -42,3 +42,22 @@ def test_roundtrip(key_and_cert):
         xml=signed_data, certificate=key_and_cert.certificate
     )
     assert unsigned_data == utils.serialize_xml(verified_element)
+
+
+def test_custom_attribute_roundtrip(key_and_cert):
+    ns = ElementMaker(namespace="urn:test", nsmap={"test": "urn:test"})
+    element_to_sign = ns.signed(ns.content("Value"), MyID="test")
+    ns.root(element_to_sign)
+    unsigned_data = utils.serialize_xml(element_to_sign)
+    config = SigningConfig.default()
+    signed_data = sign(
+        element=element_to_sign,
+        private_key=key_and_cert.private_key,
+        certificate=key_and_cert.certificate,
+        config=config,
+        attribute="MyID",
+    )
+    verified_element = extract_verified_element(
+        xml=signed_data, certificate=key_and_cert.certificate, attribute="MyID"
+    )
+    assert unsigned_data == utils.serialize_xml(verified_element)
