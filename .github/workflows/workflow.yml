@@ -1,0 +1,69 @@
+name: minisgnxml workflow
+
+on: [push, pull_request]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: 3.8
+  POETRY_VERSION: 1.4.0
+
+jobs:
+  poetry-lock:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry lock
+      - uses: actions/cache@v3
+        with:
+          path: poetry.lock
+          key: ${{ github.sha }}
+  
+  pytest:
+    needs: poetry-lock
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - uses: actions/cache@v3
+        with:
+          path: poetry.lock
+          key: ${{ github.sha }}
+      - run: poetry install
+      - run: |
+          sudo apt-get update && sudo apt-get install -y xmlsec1
+          xmlsec1 --version
+      - run: poetry run pytest
+
+  pre-commit:
+    needs: poetry-lock
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - uses: actions/cache@v3
+        with:
+          path: poetry.lock
+          key: ${{ github.sha }}
+      - run: poetry install
+      - uses: pre-commit/actions@v3.0.0
