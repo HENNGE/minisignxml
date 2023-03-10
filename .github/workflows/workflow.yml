@@ -1,0 +1,88 @@
+name: minisgnxml workflow
+
+on: [push, pull_request]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSIONS: '["3.7", "3.8", "3.9", "3.10", "3.11"]'
+  POETRY_VERSION: 1.4.0
+
+jobs:
+  # workaround since matrix can not access `env` but can access `needs`
+  python-versions:
+    runs-on: "ubuntu-latest"
+    outputs:
+      versions: ${{ steps.set-versions.outputs.versions }}
+    steps:
+      - id: set-versions
+        run: echo "versions=$PYTHON_VERSIONS" >> $GITHUB_OUTPUT
+
+  poetry-lock:
+    needs: python-versions
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry lock
+      - uses: actions/cache@v3
+        with:
+          path: poetry.lock
+          key: ${{ github.sha }}-${{ matrix.python-version }}
+  
+  pytest:
+    needs: [poetry-lock, python-versions]
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - uses: actions/cache@v3
+        with:
+          path: poetry.lock
+          key: ${{ github.sha }}-${{ matrix.python-version }}
+      - run: poetry install
+      - run: |
+          sudo apt-get update && sudo apt-get install -y xmlsec1
+          xmlsec1 --version
+      - run: poetry run pytest
+
+  pre-commit:
+    needs: [poetry-lock, python-versions]
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - uses: actions/cache@v3
+        with:
+          path: poetry.lock
+          key: ${{ github.sha }}-${{ matrix.python-version }}
+      - run: poetry install
+      - uses: pre-commit/actions@v3.0.0

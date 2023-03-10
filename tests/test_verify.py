@@ -279,7 +279,7 @@ def test_verification_failed(cert_and_signed):
     cert, xml = cert_and_signed
     root = utils.deserialize_xml(xml)
     signature_value = root.find(".//{http://www.w3.org/2000/09/xmldsig#}SignatureValue")
-    signature_value.text = "x" + signature_value.text
+    signature_value.text = "YWFh" + signature_value.text
     xml = utils.serialize_xml(root)
     with pytest.raises(VerificationFailed):
         extract_verified_element(xml=xml, certificate=cert, config=_verify_config)
