@@ -116,7 +116,7 @@ def get_root(element: Element) -> Element:
 
 def remove_preserving_whitespace(element: Element) -> None:
     parent = element.getparent()
-    assert parent
+    assert parent is not None
     if element.tail:
         prev = element.getprevious()
         if prev is not None:
