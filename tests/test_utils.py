@@ -16,6 +16,7 @@ from minisignxml.internal import utils
 def test_remove_element(input, output):
     tree = utils.deserialize_xml(input)
     element = tree.find("remove")
+    assert element is not None
     utils.remove_preserving_whitespace(element)
     result = utils.serialize_xml(tree)
     assert result == output
