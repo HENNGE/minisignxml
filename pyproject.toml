@@ -25,7 +25,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.8"
 cryptography = ">=2.8"
-lxml = "^5.2"
+lxml = "^5.0"
 defusedxml = ">=0.6.0"
 
 [tool.poetry.group.dev.dependencies]
