@@ -1,5 +1,9 @@
 # Changelog
 
+## 24.6
+
+* Updated some dependencies.
+
 ## 23.3
 
 * Add support for alternative attributes for signing and verifying.
