@@ -3,6 +3,7 @@
 ## 24.6
 
 * Updated some dependencies.
+* Python 3.12 support.
 
 ## 23.3
 
