@@ -15,8 +15,8 @@ defaults:
     shell: bash
 
 env:
-  PYTHON_VERSIONS: '["3.7", "3.8", "3.9", "3.10", "3.11"]'
-  POETRY_VERSION: 1.4.0
+  PYTHON_VERSIONS: '["3.8", "3.9", "3.10", "3.11", "3.12"]'
+  POETRY_VERSION: 1.8.3
 
 jobs:
   # workaround since matrix can not access `env` but can access `needs`
@@ -35,13 +35,13 @@ jobs:
         python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry lock
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: poetry.lock
           key: ${{ github.sha }}-${{ matrix.python-version }}
@@ -53,12 +53,12 @@ jobs:
         python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - run: curl -sSL https://install.python-poetry.org | python3 -
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: poetry.lock
           key: ${{ github.sha }}-${{ matrix.python-version }}
@@ -75,14 +75,14 @@ jobs:
         python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - run: curl -sSL https://install.python-poetry.org | python3 -
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: poetry.lock
           key: ${{ github.sha }}-${{ matrix.python-version }}
       - run: poetry install
-      - uses: pre-commit/actions@v3.0.0
+      - uses: pre-commit/actions@v3.0.1
