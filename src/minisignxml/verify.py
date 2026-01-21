@@ -1,5 +1,6 @@
+from collections.abc import Collection
 from hmac import compare_digest
-from typing import Collection, List, Tuple, cast
+from typing import cast
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
@@ -23,7 +24,7 @@ def extract_verified_element_and_certificate(
     certificates: Collection[Certificate],
     config: VerifyConfig = VerifyConfig.default(),
     attribute: str = "ID",
-) -> Tuple[Element, Certificate]:
+) -> tuple[Element, Certificate]:
     tree = utils.deserialize_xml(xml)
     signature = utils.find_or_raise(tree, ".//ds:Signature")
     signed_info = utils.find_or_raise(signature, "./ds:SignedInfo")
@@ -77,7 +78,7 @@ def extract_verified_element_and_certificate(
         raise UnsupportedAlgorithm(digest_method)
     referenced_element = utils.exactly_one(
         cast(
-            List[Element],
+            list[Element],
             XPath(f"descendant-or-self::*[@{attribute} = $reference_id]")(
                 tree, reference_id=reference_id
             ),

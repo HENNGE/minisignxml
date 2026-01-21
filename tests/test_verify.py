@@ -3,7 +3,6 @@ import binascii
 import itertools
 import textwrap
 from dataclasses import dataclass
-from typing import Tuple
 
 import pytest
 from cryptography.hazmat.primitives import hashes
@@ -160,7 +159,7 @@ def algorithm_config(request) -> AlgorithmConfig:
 
 
 @pytest.fixture(scope="session", params=[True, False])
-def cert_and_signed(algorithm_config, request) -> Tuple[Certificate, bytes]:
+def cert_and_signed(algorithm_config, request) -> tuple[Certificate, bytes]:
     transform = _pretty_b64 if request.param else lambda x: x
     return _cert_obj, _signed(
         transform(_cert_der),

@@ -30,14 +30,33 @@ defusedxml = ">=0.7.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=5.2"
-black = "^23"
-isort = "^5"
 pytest-cov = ">=2.8.1"
 mypy = "^1"
 lxml-stubs = "^0.4.0"
+ruff = "^0.14.13"
 
-[tool.isort]
-profile = "black"
+[tool.ruff]
+line-length = 88
+exclude = [
+    "examples/",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E722", # Do not use bare `except`
+    "E501", # Line too long (104 > 88 characters)
+    "E731", # Do not assign a `lambda` expression, use a `def`
+    "UP046",
+    "UP047",
+]
+select = [
+    "DTZ",
+    "E",
+    "F",
+    "I",
+    "T201", # Don't commit print statements
+    "UP",
+]
 
 [tool.mypy]
 strict = true

@@ -1,21 +1,14 @@
 repos:
+-   repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+        # Run the linter.
+        - id: ruff
+          args: [ --fix ]
+        # Run the formatter.
+        - id: ruff-format
 -   repo: local
     hooks:
-    -   id: black
-        name: black
-        entry: poetry run black src stubs tests
-        language: system
-        require_serial: true
-        types: [python]
-        pass_filenames: false
-    -   id: isort
-        name: isort
-        entry: poetry run isort
-        language: system
-        types: [python]
-        require_serial: true
-        args: ['--filter-files']
-        files: "^(src/.*\\.py|tests/.*\\.py|stubs/.*\\.py)"
     -   id: mypy
         name: mypy
         entry: poetry run mypy

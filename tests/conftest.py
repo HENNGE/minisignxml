@@ -1,9 +1,9 @@
 import datetime
 import shutil
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from subprocess import check_output
-from typing import Callable, Tuple
 
 import pytest
 from cryptography import x509
@@ -21,7 +21,7 @@ from lxml.etree import Element
 
 from minisignxml.config import SigningConfig
 from minisignxml.internal import utils
-from minisignxml.internal.constants import *
+from minisignxml.internal.constants import XML_EXC_C14N, XMLDSIG_ENVELOPED_SIGNATURE
 from minisignxml.internal.namespaces import ds
 
 
@@ -43,7 +43,7 @@ class KeyAndCert:
     private_key: RSAPrivateKeyWithSerialization
     certificate: Certificate
 
-    def files(self) -> Tuple[str, str]:
+    def files(self) -> tuple[str, str]:
         pk_pem_path = self.tmp_path / "pk.pem"
         cert_pem_path = self.tmp_path / "cert.pem"
         with pk_pem_path.open("wb") as fobj:
@@ -58,7 +58,7 @@ class KeyAndCert:
 
 
 @pytest.fixture
-def key_factory() -> Callable[[], Tuple[RSAPrivateKeyWithSerialization, Certificate]]:
+def key_factory() -> Callable[[], tuple[RSAPrivateKeyWithSerialization, Certificate]]:
     def factory():
         backend = default_backend()
         key = rsa.generate_private_key(
@@ -70,8 +70,11 @@ def key_factory() -> Callable[[], Tuple[RSAPrivateKeyWithSerialization, Certific
             .issuer_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "test")]))
             .public_key(key.public_key())
             .serial_number(x509.random_serial_number())
-            .not_valid_before(datetime.datetime.utcnow())
-            .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=1))
+            .not_valid_before(datetime.datetime.now(tz=datetime.timezone.utc))
+            .not_valid_after(
+                datetime.datetime.now(tz=datetime.timezone.utc)
+                + datetime.timedelta(days=1)
+            )
             .sign(key, hashes.SHA256(), backend)
         )
         return key, cert
