@@ -1,11 +1,9 @@
-from typing import Union
-
 from lxml.etree import XMLParser, _Element
 
 def fromstring(
-    text: Union[str, bytes],
+    text: str | bytes,
     parser: XMLParser = ...,
-    base_url: Union[str, bytes] = ...,
+    base_url: str | bytes = ...,
     forbid_dtd: bool = ...,
     forbid_entities: bool = ...,
 ) -> _Element: ...

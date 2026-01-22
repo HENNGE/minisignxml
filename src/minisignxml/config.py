@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Collection
 from dataclasses import dataclass
-from typing import Collection, Type
 
 from cryptography.hazmat.primitives import hashes
 
@@ -18,8 +18,8 @@ class SigningConfig:
 
 @dataclass(frozen=True)
 class VerifyConfig:
-    allowed_signature_method: Collection[Type[hashes.HashAlgorithm]]
-    allowed_digest_method: Collection[Type[hashes.HashAlgorithm]]
+    allowed_signature_method: Collection[type[hashes.HashAlgorithm]]
+    allowed_digest_method: Collection[type[hashes.HashAlgorithm]]
 
     @classmethod
     def default(cls) -> VerifyConfig:

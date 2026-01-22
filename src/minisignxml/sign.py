@@ -8,7 +8,7 @@ from lxml.etree import _Element as Element
 from .config import SigningConfig
 from .errors import NoIDAttribute
 from .internal import utils
-from .internal.constants import *
+from .internal.constants import XML_EXC_C14N, XMLDSIG_ENVELOPED_SIGNATURE
 from .internal.namespaces import ds
 
 __all__ = ("sign",)

@@ -1,5 +1,4 @@
 import datetime
-from typing import Tuple
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -35,7 +34,7 @@ def roundtrip() -> None:
     print(serialize_xml(verified).decode("utf-8"))
 
 
-def make_key_and_cert() -> Tuple[RSAPrivateKey, Certificate]:
+def make_key_and_cert() -> tuple[RSAPrivateKey, Certificate]:
     """
     Create a private key/certificate pair. In real code you would usually
     generate these once and then securely store them somewhere.
@@ -50,8 +49,11 @@ def make_key_and_cert() -> Tuple[RSAPrivateKey, Certificate]:
         .issuer_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "test")]))
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.datetime.utcnow())
-        .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=1))
+        .not_valid_before(datetime.datetime.now(tz=datetime.timezone.utc))
+        .not_valid_after(
+            datetime.datetime.now(tz=datetime.timezone.utc)
+            + datetime.timedelta(days=1)
+        )
         .sign(key, hashes.SHA256(), backend)
     )
     return key, cert

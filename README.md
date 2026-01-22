@@ -1,6 +1,6 @@
 # minisignxml
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Linter: Ruff](https://img.shields.io/badge/Linter-Ruff-blue)](https://github.com/astral-sh/ruff)
 [![CircleCI](https://circleci.com/gh/HENNGE/minisignxml.svg?style=svg)](https://circleci.com/gh/HENNGE/minisignxml)
 
 

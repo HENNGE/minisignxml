@@ -1,5 +1,5 @@
 import base64
-from typing import List, Mapping
+from collections.abc import Mapping
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -17,7 +17,7 @@ from ..errors import (
     UnsupportedAlgorithm,
     UnsupportedHasher,
 )
-from .constants import *
+from .constants import XMLDSIG_RSA_SHA1, XMLDSIG_RSA_SHA256, XMLDSIG_SHA1, XMLENC_SHA256
 from .namespaces import NAMESPACE_MAP
 
 
@@ -83,7 +83,7 @@ def find_or_raise(
     return exactly_one(element.findall(path, ns_map), path, element)
 
 
-def exactly_one(elements: List[Element], path: str, parent: Element) -> Element:
+def exactly_one(elements: list[Element], path: str, parent: Element) -> Element:
     num_results = len(elements)
     if num_results < 1:
         raise ElementNotFound(path, parent)
