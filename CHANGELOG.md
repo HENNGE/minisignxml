@@ -3,7 +3,8 @@
 ## 26.1
 
 * Updated the minimum required version of some dependencies.
-* Python 3.13 and 3.14 support.
+* Added support for Python 3.13 and 3.14.
+* Dropped support for Python 3.8 and 3.9.
 
 ## 24.6
 
