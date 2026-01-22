@@ -2,7 +2,7 @@
 
 ## 26.1
 
-* Updated some dependencies.
+* Updated the minimum required version of some dependencies.
 * Python 3.13 and 3.14 support.
 
 ## 24.6
