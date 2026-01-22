@@ -1,5 +1,10 @@
 # Changelog
 
+## 26.1
+
+* Updated some dependencies.
+* Python 3.13 and 3.14 support.
+
 ## 24.6
 
 * Updated some dependencies.
